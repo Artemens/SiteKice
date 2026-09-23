@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanctum — галерея божественного фурри-искусства</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============ БАЗА ============ */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:        #0d0a14;
+  --bg2:       #14101f;
+  --panel:     rgba(28, 22, 42, 0.55);
+  --border:    rgba(212, 175, 55, 0.25);
+  --gold:      #d4af37;
+  --gold-2:    #f5d76e;
+  --gold-soft: rgba(212, 175, 55, 0.15);
+  --purple:    #7c3aed;
+  --crimson:   #8b1a3a;
+  --teal:      #2dd4bf;
+  --text:      #ede6d8;
+  --text-dim:  #a99f8c;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  cursor: none;
+}
+
+/* Кастомный курсор */
+.cursor-dot, .cursor-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+.cursor-dot  { width:6px; height:6px; background:var(--gold-2); transition: transform .08s; }
+.cursor-ring {
+  width:36px; height:36px; border:1px solid var(--gold);
+  transition: transform .18s ease-out, opacity .2s;
+  opacity:.6;
+}
+a, button, .card, input, textarea { cursor: none; }
+
+/* ============ AGE GATE ============ */
+.age-gate {
+  position: fixed; inset:0; z-index: 10000;
+  background: radial-gradient(ellipse at center, #1a1329 0%, #06040a 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 28px; text-align: center; padding: 20px;
+  transition: opacity .6s, visibility .6s;
+}
+.age-gate.hidden { opacity: 0; visibility: hidden; }
+
+.age-sigil {
+  width: 120px; height: 120px;
+  position: relative; margin-bottom: 12px;
+}
+.age-sigil svg { width: 100%; height: 100%; animation: spin 24s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.age-gate h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 600;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: 2px;
+}
+.age-gate p { color: var(--text-dim); max-width: 480px; line-height: 1.6; font-size: 15px; }
+.age-actions { display: flex; gap: 16px; margin-top: 8px; }
+
+/* ============ КНОПКИ ============ */
+.btn {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 14px 32px;
+  border: 1px solid var(--gold);
+  background: transparent; color: var(--gold-2);
+  border-radius: 2px;
+  position: relative; overflow: hidden;
+  transition: color .35s, box-shadow .35s, background .35s;
+}
+.btn:hover {
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  color: #1a1329;
+  box-shadow: 0 0 24px rgba(212,175,55,.5);
+}
+.btn-ghost { border-color: rgba(212,175,55,.4); color: var(--text-dim); }
+.btn-ghost:hover { color: #1a1329; }
+
+.btn::after {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.35), transparent 60%);
+  opacity:0; transition: opacity .3s;
+}
+.btn:hover::after { opacity: 1; }
+
+/* ============ НАВИГАЦИЯ ============ */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(13, 10, 20, 0.72);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 18px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 700; letter-spacing: 3px;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.tabs { display: flex; gap: 6px; position: relative; }
+.tab {
+  padding: 8px 16px; font-size: 13px; font-weight: 500;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-dim); background: none; border: none;
+  transition: color .25s; position: relative;
+}
+.tab:hover { color: var(--gold-2); }
+.tab.active { color: var(--gold-2); }
+.tab-indicator {
+  position: absolute; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transition: all .35s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+/* ============ HERO ============ */
+.hero {
+  position: relative; min-height: 92vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 60px 24px;
+  overflow: hidden;
+}
+
+/* луч света */
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 50% -10%, rgba(212,175,55,.18), transparent 60%),
+    radial-gradient(ellipse 40% 60% at 50% 100%, rgba(124,58,237,.15), transparent 60%);
+  pointer-events:none;
+}
+
+.halo {
+  position: absolute; top: 8%;
+  width: 340px; height: 340px;
+  opacity: .35; pointer-events:none;
+}
+.halo svg { width:100%; height:100%; animation: spin 60s linear infinite; }
+
+.hero-content { position: relative; z-index: 2; max-width: 760px; }
+
+.hero-eyebrow {
+  font-size: 12px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 20px; opacity:.8;
+}
+
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 600; line-height: 1; letter-spacing: 2px;
+  background: linear-gradient(180deg, #fff8e1 0%, var(--gold-2) 40%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 30px rgba(212,175,55,.3));
+  margin-bottom: 24px;
+}
+.hero p {
+  font-size: 17px; color: var(--text-dim);
+  line-height: 1.7; max-width: 560px; margin: 0 auto 40px;
+}
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* Перья */
+.feather {
+  position: absolute; top: -40px;
+  font-size: 20px; color: var(--gold);
+  opacity: .35; pointer-events: none;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+/* ============ СЕКЦИИ ============ */
+section { padding: 100px 24px; position: relative; }
+.container { max-width: 1200px; margin: 0 auto; }
+
+.section-title {
+  text-align: center; margin-bottom: 60px;
+}
+.section-title .eyebrow {
+  font-size: 12px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--gold); opacity:.75; margin-bottom: 14px;
+}
+.section-title h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 5vw, 56px); font-weight: 600;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  letter-spacing: 1px;
+}
+
+/* ============ ФИЛЬТРЫ ============ */
+.filters {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; margin-bottom: 48px;
+}
+.chip {
+  padding: 8px 18px; border-radius: 40px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--text-dim);
+  font-size: 13px; letter-spacing: .5px;
+  transition: all .25s;
+}
+.chip:hover { border-color: var(--gold); color: var(--gold-2); }
+.chip.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  color: #1a1329; border-color: transparent;
+  box-shadow: 0 0 18px rgba(212,175,55,.4);
+}
+
+/* ============ ГАЛЕРЕЯ ============ */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.card {
+  position: relative; aspect-ratio: 3/4;
+  border-radius: 4px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  transition: transform .4s cubic-bezier(.2,.8,.2,1), border-color .3s, box-shadow .3s;
+}
+.card:hover {
+  transform: translateY(-6px);
+  border-color: var(--gold);
+  box-shadow: 0 12px 40px rgba(212,175,55,.25);
+}
+.card-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  transition: transform .6s, filter .4s;
+}
+.card:hover .card-img { transform: scale(1.06); }
+
+.card.nsfw .card-img { filter: blur(18px) saturate(.6); transform: scale(1.1); }
+.card.nsfw.unlocked .card-img { filter: none; transform: scale(1.06); }
+
+.card-nsfw-badge {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; z-index: 2;
+  background: rgba(13,10,20,.35);
+  color: var(--gold-2);
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  transition: opacity .3s;
+}
+.card.nsfw.unlocked .card-nsfw-badge { opacity: 0; pointer-events: none; }
+.card-nsfw-badge .icon { font-size: 32px; }
+
+.card-overlay {
+  position: absolute; inset: auto 0 0 0; z-index: 3;
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(13,10,20,.95));
+  transform: translateY(20%); opacity: 0;
+  transition: all .35s;
+}
+.card:hover .card-overlay { transform: translateY(0); opacity: 1; }
+.card-overlay h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--gold-2); margin-bottom: 4px;
+}
+.card-overlay .tags {
+  font-size: 11px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim);
+}
+
+/* ============ ПРАЙС ============ */
+.price-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.price-card {
+  padding: 32px 26px;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  position: relative;
+  transition: all .3s;
+}
+.price-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(212,175,55,.15);
+}
+.price-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; color: var(--gold-2); margin-bottom: 6px;
+}
+.price-card .price {
+  font-size: 32px; font-weight: 700; color: var(--gold);
+  margin: 14px 0 18px;
+}
+.price-card .price small { font-size: 14px; opacity:.6; font-weight: 400; }
+.price-card ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.price-card li {
+  font-size: 14px; color: var(--text-dim);
+  padding-left: 22px; position: relative; line-height: 1.5;
+}
+.price-card li::before {
+  content: '✦'; position: absolute; left: 0; color: var(--gold);
+}
+
+/* ============ FAQ ============ */
+.faq { max-width: 800px; margin: 0 auto; }
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 22px 0;
+}
+.faq-q {
+  width: 100%; text-align: left; background: none; border: none;
+  color: var(--text); font-size: 17px; font-weight: 500;
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  padding: 6px 0; transition: color .25s;
+}
+.faq-q:hover { color: var(--gold-2); }
+.faq-q .plus {
+  color: var(--gold); font-size: 22px; font-weight: 300;
+  transition: transform .3s;
+}
+.faq-item.open .faq-q .plus { transform: rotate(45deg); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s ease, padding .3s;
+  color: var(--text-dim); line-height: 1.7; font-size: 15px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding-top: 14px; }
+
+/* ============ ФОРМА ============ */
+.order-form {
+  max-width: 640px; margin: 0 auto;
+  background: var(--panel); backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 40px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label {
+  font-size: 12px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); opacity:.8;
+}
+.field input, .field textarea, .field select {
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px;
+  color: var(--text); font-family: inherit; font-size: 15px;
+  transition: border-color .25s, box-shadow .25s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+.field textarea { min-height: 120px; resize: vertical; }
+
+/* ============ ФУТЕР ============ */
+footer {
+  padding: 60px 24px 40px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim); font-size: 13px;
+}
+footer .socials {
+  display: flex; gap: 18px; justify-content: center;
+  margin-bottom: 24px; flex-wrap: wrap;
+}
+footer .socials a {
+  color: var(--text-dim); text-decoration: none;
+  letter-spacing: 2px; text-transform: uppercase; font-size: 12px;
+  transition: color .25s;
+}
+footer .socials a:hover { color: var(--gold-2); }
+
+/* ============ ЛАЙТБОКС ============ */
+.lightbox {
+  position: fixed; inset: 0; z-index: 5000;
+  background: rgba(6,4,10,.94);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+  padding: 40px;
+}
+.lightbox.open { opacity: 1; visibility: visible; }
+.lightbox img {
+  max-width: 90vw; max-height: 85vh;
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 60px rgba(212,175,55,.3);
+}
+.lightbox-close {
+  position: absolute; top: 24px; right: 32px;
+  background: none; border: none; color: var(--gold-2);
+  font-size: 32px; font-weight: 200;
+}
+
+/* ============ REVEAL ON SCROLL ============ */
+.reveal { opacity: 0; transform: translateY(30px); transition: all .8s cubic-bezier(.2,.8,.2,1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ============ АДАПТИВ ============ */
+@media (max-width: 720px) {
+  .nav-inner { flex-direction: column; gap: 12px; padding: 14px; }
+  .tabs { flex-wrap: wrap; justify-content: center; }
+  .age-gate h1 { font-size: 32px; }
+  section { padding: 70px 18px; }
+  .order-form { padding: 24px; }
+  body { cursor: auto; }
+  .cursor-dot, .cursor-ring { display: none; }
+  a, button, .card { cursor: pointer; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ КУРСОР ============ -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ============ AGE GATE ============ -->
+<div class="age-gate" id="ageGate">
+  <div class="age-sigil">
+    <svg viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1">
+      <circle cx="50" cy="50" r="40"/>
+      <circle cx="50" cy="50" r="30"/>
+      <circle cx="50" cy="50" r="20"/>
+      <line x1="50" y1="10" x2="50" y2="90"/>
+      <line x1="10" y1="50" x2="90" y2="50"/>
+      <line x1="22" y1="22" x2="78" y2="78"/>
+      <line x1="78" y1="22" x2="22" y2="78"/>
+    </svg>
+  </div>
+  <h1>Святилище</h1>
+  <p>Это портфолио содержит материалы для взрослых (18+): NSFW, яой, фурри-арт. Подтверди, что тебе есть 18 лет.</p>
+  <div class="age-actions">
+    <button class="btn" onclick="enterSite(true)">Мне есть 18</button>
+    <button class="btn btn-ghost" onclick="enterSite(false)">Мне нет 18</button>
+  </div>
+</div>
+
+<!-- ============ НАВИГАЦИЯ ============ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">SANCTUM</div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-target="hero">Главная</button>
+      <button class="tab" data-target="gallery">Галерея</button>
+      <button class="tab" data-target="price">Прайс</button>
+      <button class="tab" data-target="faq">FAQ</button>
+      <button class="tab" data-target="order">Заказать</button>
+      <div class="tab-indicator" id="tabIndicator"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="hero">
+  <div class="halo">
+    <svg viewBox="0 0 200 200" fill="none" stroke="#d4af37" stroke-width="0.6">
+      <circle cx="100" cy="100" r="60"/>
+      <circle cx="100" cy="100" r="75" stroke-dasharray="3 5"/>
+      <g stroke-width="0.8">
+        <script/>
+      </g>
+      <!-- лучи -->
+      <g id="rays"></g>
+    </svg>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">✦ Божественное фурри-искусство ✦</div>
+    <h1>Sanctum<br>Noctis</h1>
+    <p>Иллюстрации для взрослых: фурри, яой, мистические сюжеты. Индивидуальные заказы, коммишены, авторские персонажи.</p>
+    <div class="hero-actions">
+      <button class="btn" onclick="scrollToId('gallery')">Галерея</button>
+      <button class="btn btn-ghost" onclick="scrollToId('order')">Заказать арт</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ ГАЛЕРЕЯ ============ -->
+<section id="gallery">
+  <div class="container">
+    <div class="section-title reveal">
+      <div class="eyebrow">Реликвии</div>
+      <h2>Галерея</h2>
+    </div>
+
+    <div class="filters reveal" id="filters">
+      <button class="chip active" data-filter="all">Все</button>
+      <button class="chip" data-filter="sfw">SFW</button>
+      <button class="chip" data-filter="nsfw">NSFW</button>
+      <button class="chip" data-filter="yaoi">Яой</button>
+      <button class="chip" data-filter="furry">Фурри</button>
+    </div>
+
+    <div class="gallery" id="galleryGrid"></div>
+  </div>
+</section>
+
+<!-- ============ ПРАЙС ============ -->
+<section id="price" style="background: linear-gradient(180deg, transparent, rgba(124,58,237,.05), transparent);">
+  <div class="container">
+    <div class="section-title reveal">
+      <div class="eyebrow">Подношения</div>
+      <h2>Прайс</h2>
+    </div>
+
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <h3>Скетч</h3>
+        <div class="price">1 500 ₽ <small>/ $15</small></div>
+        <ul>
+          <li>Чёрно-белый набросок</li>
+          <li>1 персонаж</li>
+          <li>Срок: 2–3 дня</li>
+          <li>1 правка</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <h3>Лайн + цвет</h3>
+        <div class="price">3 500 ₽ <small>/ $35</small></div>
+        <ul>
+          <li>Чистый лайн</li>
+          <li>Плоский цвет</li>
+          <li>1 персонаж</li>
+          <li>Срок: 5–7 дней</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <h3>Полный рендер</h3>
+        <div class="price">7 000 ₽ <small>/ $70</small></div>
+        <ul>
+          <li>Детальная покраска</li>
+          <li>Свет, тени, фон</li>
+          <li>2 правки</li>
+          <li>Срок: 10–14 дней</li>
+        </ul>
+      </div>
+      <div class="price-card reveal">
+        <h3>NSFW / яой</h3>
+        <div class="price">+50% <small>к базе</small></div>
+        <ul>
+          <li>Откровенные сцены</li>
+          <li>2+ персонажа</li>
+          <li>Обсуждается индивидуально</li>
+          <li>Строго 18+</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-title reveal">
+      <div class="eyebrow">Тайны</div>
+      <h2>Вопросы</h2>
+    </div>
+
+    <div class="faq">
+      <div class="faq-item reveal">
+        <button class="faq-q">Рисуешь ли ты NSFW? <span class="plus">+</span></button>
+        <div class="faq-a">Да, рисую для совершеннолетних заказчиков. Все персонажи на NSFW-работах — 18+. Обсуждаем сюжет, границы и референсы до начала работы.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">Какие сроки? <span class="plus">+</span></button>
+        <div class="faq-a">От 2 дней (скетч) до 2–3 недель (сложная иллюстрация). Точные сроки называю после обсуждения брифа.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">Сколько правок? <span class="plus">+</span></button>
+        <div class="faq-a">В базовую цену входит 1–2 раунда правок на этапе скетча. Правки после покраски — за доплату.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">Как оплата? <span class="plus">+</span></button>
+        <div class="faq-a">50% предоплата, 50% после финального утверждения. Принимаю Boosty, перевод на карту, крипту.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">Можно использовать арт коммерчески? <span class="plus">+</span></button>
+        <div class="faq-a">Личное использование — да. Коммерческое (мерч, реклама, игры) — по отдельному согласованию и тарифу.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ФОРМА ЗАКАЗА ============ -->
+<section id="order">
+  <div class="container">
+    <div class="section-title reveal">
+      <div class="eyebrow">Призыв</div>
+      <h2>Заказать арт</h2>
+    </div>
+
+    <form class="order-form reveal" onsubmit="event.preventDefault(); alert('Заявка отправлена! (демо — здесь будет реальная отправка)'); this.reset();">
+      <div class="field">
+        <label>Твой ник</label>
+        <input type="text" required placeholder="Как к тебе обращаться">
+      </div>
+      <div class="field">
+        <label>Контакт (Telegram / Discord / Email)</label>
+        <input type="text" required placeholder="@username или почта">
+      </div>
+      <div class="field">
+        <label>Тип работы</label>
+        <select required>
+          <option value="">— выбери —</option>
+          <option>Скетч</option>
+          <option>Лайн + цвет</option>
+          <option>Полный рендер</option>
+          <option>NSFW / яой сцена</option>
+          <option>Авторский персонаж / референс-лист</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Описание заказа</label>
+        <textarea required placeholder="Персонажи, сюжет, настроение, референсы, дедлайн..."></textarea>
+      </div>
+      <button type="submit" class="btn" style="align-self:center; margin-top:8px;">Отправить заявку</button>
+    </form>
+  </div>
+</section>
+
+<!-- ============ ФУТЕР ============ -->
+<footer>
+  <div class="socials">
+    <a href="#">Twitter / X</a>
+    <a href="#">Telegram</a>
+    <a href="#">Boosty</a>
+    <a href="#">Discord</a>
+    <a href="#">VGen</a>
+  </div>
+  <div>© 2026 Sanctum Noctis · Все персонажи на NSFW-работах 18+ · Все права на арты принадлежат автору</div>
+</footer>
+
+<!-- ============ ЛАЙТБОКС ============ -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+/* ============ КУРСОР ============ */
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+  dot.style.left = (e.clientX - 3) + 'px';
+  dot.style.top  = (e.clientY - 3) + 'px';
+  ring.style.left = (e.clientX - 18) + 'px';
+  ring.style.top  = (e.clientY - 18) + 'px';
+});
+
+/* ripple для кнопок */
+document.querySelectorAll('.btn').forEach(b => {
+  b.addEventListener('mousemove', e => {
+    const r = b.getBoundingClientRect();
+    b.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    b.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+});
+
+/* ============ AGE GATE ============ */
+function enterSite(adult) {
+  const gate = document.getElementById('ageGate');
+  if (!adult) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#d4af37;text-align:center;padding:40px;"><div><h1 style="font-family:Cormorant Garamond,serif;font-size:48px;">До встречи ✦</h1><p style="color:#a99f8c;margin-top:16px;">Этот сайт только для взрослых.</p></div></div>';
+    return;
+  }
+  gate.classList.add('hidden');
+  setTimeout(() => gate.remove(), 700);
+}
+
+/* ============ НИМБ — ЛУЧИ ============ */
+(function makeRays() {
+  const g = document.getElementById('rays');
+  if (!g) return;
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2;
+    const x1 = 100 + Math.cos(a) * 78;
+    const y1 = 100 + Math.sin(a) * 78;
+    const x2 = 100 + Math.cos(a) * (i % 4 === 0 ? 98 : 88);
+    const y2 = 100 + Math.sin(a) * (i % 4 === 0 ? 98 : 88);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('opacity', i % 4 === 0 ? '0.9' : '0.4');
+    g.appendChild(line);
